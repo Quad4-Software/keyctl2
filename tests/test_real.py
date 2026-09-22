@@ -392,4 +392,5 @@ def test_capabilities() -> None:
         caps = capabilities()
     except UnsupportedError:
         pytest.skip("KEYCTL_CAPABILITIES unsupported")
-    assert len(caps) >= 1
+    else:
+        assert len(caps) >= 1
