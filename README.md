@@ -6,6 +6,10 @@
 [![PyPI](https://img.shields.io/pypi/v/keyctl2.svg)](https://pypi.org/project/keyctl2/)
 [![License: 0BSD](https://img.shields.io/badge/license-0BSD-blue)](LICENSE)
 
+Dependency-free Python bindings for the Linux kernel keyring: add,
+search, read, describe, link and unlink keys in session and process
+keyrings, without shelling out to keyctl(1).
+
 Requires Python 3.10+ and Linux. No runtime dependencies: the bindings
 call add_key(2), request_key(2) and keyctl(2) through ctypes.
 
