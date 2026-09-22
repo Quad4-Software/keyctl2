@@ -3,7 +3,7 @@
 
 glibc has no wrappers for these syscalls on most architectures, so all
 three are invoked through libc's syscall(2). The numbers differ per
-architecture; the table covers the common ones and everything else gets
+architecture. The table covers the common ones and everything else gets
 UnsupportedError.
 """
 
@@ -118,7 +118,7 @@ def revoke(serial: int) -> None:
 
 
 def chown(serial: int, uid: int, gid: int) -> None:
-    """KEYCTL_CHOWN: set ownership; -1 leaves a field unchanged."""
+    """KEYCTL_CHOWN: set ownership. -1 leaves a field unchanged."""
     _keyctl(KeyctlOp.CHOWN, serial, _u32(uid), _u32(gid))
 
 

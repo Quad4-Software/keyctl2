@@ -136,7 +136,7 @@ def restrict(
 
     With type=None and restriction=None the ring rejects all further
     links. A type may only be named if it implements a restriction
-    scheme, like "asymmetric" does; the restriction string then selects
+    scheme, like "asymmetric" does. The restriction string then selects
     the scheme, for example "builtin_trusted". Restriction is permanent.
     """
     _syscall.restrict_keyring(
@@ -269,7 +269,7 @@ class Key:
         _syscall.invalidate(self._serial)
 
     def chown(self, uid: int = -1, gid: int = -1) -> None:
-        """Set the key's owner; -1 leaves a field unchanged."""
+        """Set the key's owner. -1 leaves a field unchanged."""
         _syscall.chown(self._serial, uid, gid)
 
     def search(

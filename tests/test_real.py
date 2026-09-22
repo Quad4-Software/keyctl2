@@ -54,7 +54,7 @@ def run_child(fn: Callable[[], None]) -> None:
             fn()
         except _SkipError:
             code = 2
-        # pytest failures like Failed are BaseException subclasses; any
+        # pytest failures like Failed are BaseException subclasses. Any
         # escape would let the child keep running the pytest session
         except BaseException:  # noqa: BLE001
             traceback.print_exc()
@@ -283,7 +283,7 @@ def test_restrict_keyring() -> None:
             add_key("user", "keyctl2-nope", b"x", sealed)
 
         # Only key types that implement a restriction scheme, such as
-        # asymmetric, can be named; "user" has none and gives EINVAL.
+        # asymmetric, can be named. "user" has none and gives EINVAL.
         typed = add_key("keyring", "keyctl2-typed", None)
         try:
             restrict(typed, "asymmetric", "builtin_trusted")

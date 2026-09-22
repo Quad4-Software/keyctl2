@@ -20,7 +20,7 @@ __all__ = [
 class KeySpec(IntEnum):
     """Special keyring IDs, resolved by the kernel per caller.
 
-    The negative values are passed to the kernel verbatim; they are not
+    The negative values are passed to the kernel verbatim. They are not
     real key serials.
     """
 
@@ -57,7 +57,7 @@ class KeyPerm(IntFlag):
 
     Each of the possessor, user, group and other classes holds the same
     six bits: VIEW, READ, WRITE, SEARCH, LINK and SETATTR. The ALL masks
-    cover a whole class; KeyPerm.ALL covers everything.
+    cover a whole class. KeyPerm.ALL covers everything.
     """
 
     NONE = 0

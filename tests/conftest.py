@@ -11,7 +11,7 @@ requires_linux = pytest.mark.skipif(sys.platform != "linux", reason="Linux only"
 
 
 def _probe() -> int:
-    """Fork a child that joins a session keyring; return its exit code.
+    """Fork a child that joins a session keyring and return its exit code.
 
     The probe runs in a child so the test process's own keyrings are
     never touched.

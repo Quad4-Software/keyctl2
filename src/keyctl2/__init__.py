@@ -2,7 +2,7 @@
 """Python bindings for the Linux kernel key retention service.
 
 Create and search keys and keyrings through add_key(2), request_key(2)
-and keyctl(2) via ctypes; there are no runtime dependencies.
+and keyctl(2) via ctypes. There are no runtime dependencies.
 
 Kernel references: keyctl(2), add_key(2), request_key(2), keyrings(7).
 """
