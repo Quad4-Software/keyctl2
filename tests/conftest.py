@@ -42,6 +42,6 @@ def keys_available() -> bool:
 
 
 requires_keys = pytest.mark.skipif(
-    not keys_available(),
+    not keys_available() and os.environ.get("Q4_REQUIRE_LIVE") != "1",
     reason="kernel keyrings unavailable (ENOSYS or EACCES)",
 )
