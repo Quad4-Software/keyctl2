@@ -130,9 +130,17 @@ def setperm(serial: int, perm: int) -> None:
 def describe(serial: int) -> bytes:
     """KEYCTL_DESCRIBE: return the type;uid;gid;perm;description string."""
     size = _keyctl(KeyctlOp.DESCRIBE, serial, None, 0)
-    buf = ctypes.create_string_buffer(size)
-    _keyctl(KeyctlOp.DESCRIBE, serial, buf, size)
-    return bytes(buf.value)
+    # The description may grow between the size probe and the copy, in
+    # which case the kernel truncates without a NUL. Retry a few times,
+    # then return whatever fits, always bounded by the buffer.
+    for _ in range(4):
+        buf = ctypes.create_string_buffer(size)
+        got = _keyctl(KeyctlOp.DESCRIBE, serial, buf, size)
+        if got <= size:
+            # got counts the terminating NUL
+            return buf.raw[: got - 1]
+        size = got
+    return buf.raw[:size].split(b"\x00", 1)[0]
 
 
 def clear(ringid: int) -> None:
@@ -160,9 +168,16 @@ def read(serial: int) -> bytes:
     size = _keyctl(KeyctlOp.READ, serial, None, 0)
     if size == 0:
         return b""
-    buf = ctypes.create_string_buffer(size)
-    got = _keyctl(KeyctlOp.READ, serial, buf, size)
-    return buf.raw[:got]
+    # A payload that grows between the size probe and the copy gets
+    # truncated by the kernel. Retry a few times, then return whatever
+    # fits, bounded by the buffer.
+    for _ in range(4):
+        buf = ctypes.create_string_buffer(size)
+        got = _keyctl(KeyctlOp.READ, serial, buf, size)
+        if got <= size:
+            return buf.raw[:got]
+        size = got
+    return buf.raw[:size]
 
 
 def set_reqkey_keyring(default: int) -> int:
