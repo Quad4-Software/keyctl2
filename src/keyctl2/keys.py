@@ -45,17 +45,21 @@ def _ring(ring: _KeyringLike) -> int:
     return int(ring)
 
 
+def _cstr(value: str, what: str) -> bytes:
+    data = os.fsencode(value)
+    if b"\x00" in data:
+        raise ValueError(f"{what} must not contain NUL")
+    return data
+
+
 def _type(type_: _KeyTypeLike) -> bytes:
     if isinstance(type_, KeyType):
         type_ = type_.value
-    return os.fsencode(type_)
+    return _cstr(type_, "key type")
 
 
 def _desc(description: str) -> bytes:
-    data = os.fsencode(description)
-    if b"\x00" in data:
-        raise ValueError("description must not contain NUL")
-    return data
+    return _cstr(description, "description")
 
 
 def add_key(
@@ -84,7 +88,7 @@ def request_key(
     /sbin/request-key to instantiate it, passing callout_info along.
     With callout_info=None a miss raises ENOKEY.
     """
-    info = None if callout_info is None else os.fsencode(callout_info)
+    info = None if callout_info is None else _cstr(callout_info, "callout info")
     return _syscall.request_key(_type(type_), _desc(description), info, _ring(keyring))
 
 
@@ -94,7 +98,7 @@ def join_session_keyring(name: str | None = None) -> int:
     This replaces the calling process's session keyring. name=None
     joins a fresh anonymous keyring.
     """
-    return _syscall.join_session_keyring(None if name is None else os.fsencode(name))
+    return _syscall.join_session_keyring(None if name is None else _cstr(name, "name"))
 
 
 def get_keyring_id(ring: _KeyringLike, create: bool = False) -> int:
@@ -144,7 +148,7 @@ def restrict(
     _syscall.restrict_keyring(
         _ring(ring),
         None if type_ is None else _type(type_),
-        None if restriction is None else os.fsencode(restriction),
+        None if restriction is None else _cstr(restriction, "restriction"),
     )
 
 
