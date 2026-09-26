@@ -33,7 +33,7 @@ from .keys import (
     set_reqkey_keyring,
 )
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 __all__ = [
     "Key",
