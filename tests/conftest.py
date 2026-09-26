@@ -41,7 +41,10 @@ def keys_available() -> bool:
     return _PROBE_CODE == 0
 
 
+_can_probe = sys.platform == "linux" and hasattr(os, "fork")
+
 requires_keys = pytest.mark.skipif(
-    not keys_available() and os.environ.get("Q4_REQUIRE_LIVE") != "1",
+    not _can_probe
+    or (not keys_available() and os.environ.get("Q4_REQUIRE_LIVE") != "1"),
     reason="kernel keyrings unavailable (ENOSYS or EACCES)",
 )
