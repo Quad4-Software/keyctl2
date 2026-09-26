@@ -36,6 +36,8 @@ __all__ = [
 _KeyringLike = int | KeySpec | str
 _KeyTypeLike = str | KeyType
 
+_U32_MAX = 0xFFFFFFFF
+
 
 def _ring(ring: _KeyringLike) -> int:
     if isinstance(ring, str):
@@ -231,7 +233,7 @@ class Key:
 
     def set_timeout(self, seconds: int) -> None:
         """Make the key expire after the given number of seconds."""
-        if seconds < 0:
+        if not 0 <= seconds <= _U32_MAX:
             raise ValueError(f"timeout out of range: {seconds}")
         _syscall.set_timeout(self._serial, seconds)
 

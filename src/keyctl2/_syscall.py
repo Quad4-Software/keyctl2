@@ -21,6 +21,10 @@ from .flags import KeyctlOp
 _libc: ctypes.CDLL | None = None
 _numbers: tuple[int, int, int] | None = None
 
+_I32_MIN = -(2**31)
+_I32_MAX = 2**31 - 1
+_U32_MAX = 2**32 - 1
+
 
 def _get_libc() -> ctypes.CDLL:
     global _libc
@@ -69,6 +73,12 @@ def _raise_errno(err: int) -> NoReturn:
 
 
 def _call(nr: int, *args: object) -> int:
+    # ctypes marshals Python ints as c_int, so reject out-of-range
+    # values here instead of letting ctypes raise OverflowError at the
+    # call boundary
+    for arg in (nr, *args):
+        if isinstance(arg, int) and not _I32_MIN <= arg <= _I32_MAX:
+            raise ValueError(f"argument out of int32 range: {arg}")
     ret = int(_get_libc().syscall(nr, *args))
     if ret == -1:
         _raise_errno(ctypes.get_errno())
@@ -79,9 +89,11 @@ def _keyctl(op: int, *args: object) -> int:
     return _call(_syscall_numbers()[2], op, *args)
 
 
-def _u32(value: int) -> ctypes.c_uint32:
+def _u32(value: int, what: str = "value") -> ctypes.c_uint32:
     # unsigned 32-bit argument, so -1 style sentinels marshal correctly
-    return ctypes.c_uint32(value & 0xFFFFFFFF)
+    if not -1 <= value <= _U32_MAX:
+        raise ValueError(f"{what} out of range: {value}")
+    return ctypes.c_uint32(value & _U32_MAX)
 
 
 def add_key(
@@ -128,12 +140,12 @@ def revoke(serial: int) -> None:
 
 def chown(serial: int, uid: int, gid: int) -> None:
     """KEYCTL_CHOWN: set ownership. -1 leaves a field unchanged."""
-    _keyctl(KeyctlOp.CHOWN, serial, _u32(uid), _u32(gid))
+    _keyctl(KeyctlOp.CHOWN, serial, _u32(uid, "uid"), _u32(gid, "gid"))
 
 
 def setperm(serial: int, perm: int) -> None:
     """KEYCTL_SETPERM: set a key's permission mask."""
-    _keyctl(KeyctlOp.SETPERM, serial, _u32(perm))
+    _keyctl(KeyctlOp.SETPERM, serial, _u32(perm, "perm"))
 
 
 def describe(serial: int) -> bytes:
@@ -196,7 +208,7 @@ def set_reqkey_keyring(default: int) -> int:
 
 def set_timeout(serial: int, timeout: int) -> None:
     """KEYCTL_SET_TIMEOUT: expire a key after timeout seconds."""
-    _keyctl(KeyctlOp.SET_TIMEOUT, serial, _u32(timeout))
+    _keyctl(KeyctlOp.SET_TIMEOUT, serial, _u32(timeout, "timeout"))
 
 
 def session_to_parent() -> None:
@@ -211,7 +223,7 @@ def invalidate(serial: int) -> None:
 
 def get_persistent(uid: int, ringid: int) -> int:
     """KEYCTL_GET_PERSISTENT: return a user's persistent keyring serial."""
-    return _keyctl(KeyctlOp.GET_PERSISTENT, _u32(uid), ringid)
+    return _keyctl(KeyctlOp.GET_PERSISTENT, _u32(uid, "uid"), ringid)
 
 
 def restrict_keyring(
@@ -223,7 +235,7 @@ def restrict_keyring(
 
 def move(serial: int, from_ringid: int, to_ringid: int, flags: int) -> None:
     """KEYCTL_MOVE: move a key's link between keyrings."""
-    _keyctl(KeyctlOp.MOVE, serial, from_ringid, to_ringid, _u32(flags))
+    _keyctl(KeyctlOp.MOVE, serial, from_ringid, to_ringid, _u32(flags, "flags"))
 
 
 def capabilities() -> bytes:
