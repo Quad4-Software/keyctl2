@@ -41,11 +41,20 @@ def _syscall_numbers() -> tuple[int, int, int]:
     machine = platform.machine().lower()
     if machine in ("x86_64", "amd64"):
         _numbers = (248, 249, 250)
-    elif machine in ("aarch64", "arm64", "riscv64", "loongarch64"):
+    elif machine in ("aarch64", "arm64", "riscv32", "riscv64", "loongarch64"):
         # asm-generic syscall table
         _numbers = (217, 218, 219)
     elif machine in ("i386", "i486", "i586", "i686", "x86"):
         _numbers = (286, 287, 288)
+    elif machine.startswith("arm"):
+        # 32-bit ARM, armv5l through armv8l; arm64 is handled above
+        _numbers = (309, 310, 311)
+    elif machine in ("ppc", "ppc64", "ppc64le", "ppc64el"):
+        _numbers = (269, 270, 271)
+    elif machine in ("s390", "s390x"):
+        _numbers = (278, 279, 280)
+    elif machine in ("sparc", "sparc64"):
+        _numbers = (281, 282, 283)
     else:
         raise UnsupportedError(
             f"no add_key/request_key/keyctl numbers for architecture {machine}"

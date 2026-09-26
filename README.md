@@ -13,6 +13,10 @@ keyrings, without shelling out to keyctl(1).
 Requires Python 3.10+ and Linux. No runtime dependencies: the bindings
 call add_key(2), request_key(2) and keyctl(2) through ctypes.
 
+Supported architectures: x86-64, i386, aarch64, riscv32/64,
+loongarch64, 32-bit ARM, powerpc, s390x and sparc. Other architectures
+raise UnsupportedError.
+
 ## Install
 
     pip install keyctl2
