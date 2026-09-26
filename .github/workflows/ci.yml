@@ -57,3 +57,9 @@ jobs:
       - run: uv python install ${{ matrix.python }}
       - run: uv sync --locked --python ${{ matrix.python }}
       - run: Q4_REQUIRE_LIVE=1 uv run pytest --cov -rs
+
+      - name: Smoke-test the built wheel
+        run: |
+          uv build
+          uv run --no-project --with "$(ls dist/keyctl2-*.whl)" \
+            python -c "import keyctl2; print(keyctl2.__version__)"
